@@ -1893,6 +1893,19 @@ renderNotes();
 updateInsightCount();
 checkDailyReview();
 checkInsightReminder();
+
+// 自动配置云同步（通过URL参数一键绑定）
+(function autoSetupSync() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  const gist = params.get('gist');
+  if (token) {
+    localStorage.setItem(GIST_TOKEN_KEY, token);
+    if (gist) localStorage.setItem(GIST_ID_KEY, gist);
+    // 清除URL中的敏感参数
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+})();
 updateGistUI();
 
 // ── 每日回顾 ──────────────────────────────────────────────────────────
