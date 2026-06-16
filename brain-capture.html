@@ -740,24 +740,52 @@
   /* 响应式 */
   @media (max-width: 900px) {
     .layout {
-      grid-template-columns: 1fr;
-      grid-template-rows: 52px 1fr;
+      display: flex;
+      flex-direction: column;
       height: 100vh;
-      padding-bottom: 56px; /* 留出底部导航栏的空间 */
+      overflow: hidden;
+    }
+    .topbar {
+      flex-shrink: 0;
     }
     .mobile-nav { display: grid; }
-    
-    /* 移动端默认隐藏三栏，通过类名控制显示 */
-    .sidebar, .main, .panel {
-      display: none !important;
-      width: 100% !important;
-      height: 100% !important;
-      border: none !important;
+
+    /* 移动端：三栏全部绝对定位铺满，通过类名控制显隐 */
+    .sidebar {
+      display: none;
+      position: fixed;
+      top: 52px; left: 0; right: 0; bottom: 56px;
+      width: 100%; height: auto;
+      border: none;
+      z-index: 50;
+      overflow-y: auto;
     }
-    
+    .main {
+      display: none;
+      position: fixed;
+      top: 52px; left: 0; right: 0; bottom: 56px;
+      width: 100%; height: auto;
+      border: none;
+      z-index: 50;
+      overflow-y: auto;
+    }
+    .panel {
+      display: none;
+      position: fixed;
+      top: 52px; left: 0; right: 0; bottom: 56px;
+      width: 100%; height: auto;
+      border: none;
+      z-index: 50;
+      overflow-y: auto;
+      flex-direction: column;
+    }
+
     .layout.show-sidebar .sidebar { display: flex !important; }
     .layout.show-main .main { display: flex !important; }
     .layout.show-panel .panel { display: flex !important; }
+
+    /* 面板内容在手机端撑满 */
+    .panel-content { flex: 1; overflow-y: auto; }
   }
 </style>
 </head>
