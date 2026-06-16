@@ -1,0 +1,1815 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>灵感库 · 第二大脑</title>
+<style>
+  /* ── 设计令牌 ── */
+  :root {
+    --ink:        #1a1a1a;
+    --ink-dim:    #6b6b6b;
+    --ink-faint:  #b0b0b0;
+    --surface:    #f8f7f4;
+    --card:       #ffffff;
+    --border:     #e8e5de;
+    --border-dim: #f0ede6;
+    --red:        #d94f3d;
+    --red-bg:     #fdf1ef;
+    --amber:      #c47d1a;
+    --amber-bg:   #fdf6ed;
+    --green:      #2d7a4f;
+    --green-bg:   #edf7f2;
+    --blue:       #2563a8;
+    --blue-bg:    #eef4fc;
+    --tag-bg:     #ede9e0;
+    --tag-ink:    #5a5248;
+    --shadow-sm:  0 1px 3px rgba(0,0,0,.06);
+    --shadow-md:  0 4px 16px rgba(0,0,0,.08);
+    --r:          8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'SF Pro Text', system-ui, sans-serif;
+    background: var(--surface);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ── 布局 ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 220px 1fr 320px;
+    grid-template-rows: 52px 1fr;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── 顶栏 ── */
+  .topbar {
+    grid-column: 1 / -1;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 16px;
+    z-index: 10;
+  }
+  .topbar-brand {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .topbar-brand span { color: var(--red); }
+  .topbar-stats {
+    margin-left: auto;
+    display: flex;
+    gap: 20px;
+    font-size: 12px;
+    color: var(--ink-dim);
+  }
+  .topbar-stats b { color: var(--ink); }
+
+  /* API key 设置 */
+  .api-btn {
+    padding: 4px 10px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 12px;
+    color: var(--ink-dim);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .api-btn:hover { border-color: var(--ink-dim); color: var(--ink); }
+  .api-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-faint); display: inline-block; margin-right: 4px; }
+  .api-dot.active { background: var(--green); }
+
+  /* ── 左侧栏 ── */
+  .sidebar {
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    padding: 16px 12px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sidebar-section {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    color: var(--ink-faint);
+    padding: 10px 8px 4px;
+    text-transform: uppercase;
+  }
+  .sidebar-item {
+    padding: 7px 10px;
+    border-radius: var(--r);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--ink-dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all .12s;
+    user-select: none;
+  }
+  .sidebar-item:hover { background: var(--surface); color: var(--ink); }
+  .sidebar-item.active { background: var(--red-bg); color: var(--red); font-weight: 600; }
+  .sidebar-count {
+    margin-left: auto;
+    font-size: 11px;
+    background: var(--border);
+    color: var(--ink-dim);
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+  .sidebar-item.active .sidebar-count { background: rgba(217,79,61,.15); color: var(--red); }
+
+  /* 标签列表 */
+  .tag-list { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
+  .tag-item {
+    padding: 5px 10px;
+    border-radius: var(--r);
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--ink-dim);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all .12s;
+  }
+  .tag-item:hover { background: var(--surface); }
+  .tag-item.active { background: var(--tag-bg); color: var(--tag-ink); font-weight: 600; }
+
+  /* 周转率仪表 */
+  .turnover-gauge {
+    margin-top: auto;
+    background: var(--surface);
+    border-radius: var(--r);
+    padding: 12px;
+    border: 1px solid var(--border);
+  }
+  .gauge-label { font-size: 11px; color: var(--ink-dim); margin-bottom: 6px; font-weight: 600; letter-spacing: .04em; }
+  .gauge-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
+  .gauge-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--amber), var(--green)); transition: width .5s; }
+  .gauge-pct { font-size: 20px; font-weight: 700; color: var(--ink); }
+  .gauge-sub { font-size: 11px; color: var(--ink-dim); }
+
+  /* ── 中间主体 ── */
+  .main {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* 输入区 */
+  .capture-box {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+  }
+  .capture-header {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .capture-triggers {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .trigger-chip {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink-dim);
+    cursor: pointer;
+    transition: all .12s;
+    user-select: none;
+  }
+  .trigger-chip:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+  .trigger-chip.selected { border-color: var(--red); color: var(--red); background: var(--red-bg); font-weight: 600; }
+
+  textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 12px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    line-height: 1.7;
+    resize: none;
+    background: var(--surface);
+    color: var(--ink);
+    outline: none;
+    transition: border-color .15s;
+    min-height: 90px;
+  }
+  textarea:focus { border-color: var(--ink-dim); background: #fff; }
+  textarea::placeholder { color: var(--ink-faint); }
+
+  .capture-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+  .capture-hint { font-size: 12px; color: var(--ink-faint); }
+  .capture-hint kbd {
+    background: var(--border);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-family: monospace;
+  }
+  .capture-actions { display: flex; gap: 8px; }
+
+  .btn {
+    padding: 7px 16px;
+    border-radius: var(--r);
+    border: none;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all .15s;
+  }
+  .btn-primary { background: var(--ink); color: #fff; }
+  .btn-primary:hover { background: #333; }
+  .btn-secondary { background: var(--surface); color: var(--ink-dim); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); color: var(--ink); }
+  .btn-red { background: var(--red); color: #fff; }
+  .btn-red:hover { background: #c2422f; }
+
+  /* 筛选/排序栏 */
+  .filter-bar {
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border-dim);
+  }
+  .filter-tabs { display: flex; gap: 4px; }
+  .filter-tab {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--ink-dim);
+    transition: all .12s;
+    user-select: none;
+  }
+  .filter-tab:hover { background: var(--border); }
+  .filter-tab.active { background: var(--ink); color: #fff; }
+  .filter-search {
+    margin-left: auto;
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 12px;
+    font-family: inherit;
+    outline: none;
+    background: var(--surface);
+    color: var(--ink);
+    width: 160px;
+    transition: all .15s;
+  }
+  .filter-search:focus { border-color: var(--ink-dim); width: 200px; }
+
+  /* 笔记流 */
+  .notes-stream {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--ink-faint);
+  }
+  .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 13px; }
+
+  /* 笔记卡片 */
+  .note-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all .15s;
+    position: relative;
+  }
+  .note-card:hover { box-shadow: var(--shadow-sm); border-color: #d0ccC2; }
+  .note-card.selected { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(37,99,168,.15); }
+  .note-card.expired { border-left: 3px solid var(--red); }
+  .note-card.processed { border-left: 3px solid var(--green); }
+
+  .note-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--red);
+    background: var(--red-bg);
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+  }
+  .note-body {
+    font-size: 14px;
+    line-height: 1.75;
+    color: var(--ink);
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .note-body .tag {
+    color: var(--blue);
+    font-weight: 600;
+  }
+  .note-meta {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+  .note-age {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .note-age.safe { background: var(--green-bg); color: var(--green); }
+  .note-age.warn { background: var(--amber-bg); color: var(--amber); }
+  .note-age.danger { background: var(--red-bg); color: var(--red); }
+  .note-age.done { background: var(--blue-bg); color: var(--blue); }
+
+  .note-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+  .note-card:hover .note-actions { opacity: 1; }
+  .note-action-btn {
+    padding: 3px 8px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 11px;
+    cursor: pointer;
+    color: var(--ink-dim);
+    transition: all .12s;
+  }
+  .note-action-btn:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .note-action-btn.danger:hover { background: var(--red); border-color: var(--red); }
+
+  /* ── 右侧面板 ── */
+  .panel {
+    background: var(--card);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .panel-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-tab {
+    flex: 1;
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-dim);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all .15s;
+    user-select: none;
+  }
+  .panel-tab:hover { color: var(--ink); }
+  .panel-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+
+  .panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+  /* AI 加工面板 */
+  .ai-section {
+    margin-bottom: 16px;
+  }
+  .ai-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .ai-section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .ai-btn {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: var(--r);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    color: var(--ink);
+    text-align: left;
+    transition: all .15s;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .ai-btn:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .ai-btn:disabled { opacity: .4; cursor: not-allowed; }
+  .ai-btn:hover:not(:disabled) { background: var(--ink); color: #fff; }
+
+  .ai-result {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 14px;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--ink);
+    white-space: pre-wrap;
+    margin-top: 8px;
+    max-height: 400px;
+    overflow-y: auto;
+    display: none;
+  }
+  .ai-result.visible { display: block; }
+  .ai-result.loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ink-dim);
+  }
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--ink);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* 门禁四问卡片 */
+  .gatecheck {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 12px 14px;
+    margin-top: 8px;
+    display: none;
+  }
+  .gatecheck.visible { display: block; }
+  .gatecheck-q {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border);
+    display: flex;
+    gap: 8px;
+  }
+  .gatecheck-q:last-child { border-bottom: none; }
+  .gatecheck-num { color: var(--red); font-weight: 700; flex-shrink: 0; }
+  .gatecheck-result { margin-top: 10px; font-size: 12px; }
+  .pass { color: var(--green); font-weight: 700; }
+  .fail { color: var(--red); font-weight: 700; }
+
+  /* 导出面板 */
+  .export-item {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all .12s;
+  }
+  .export-item:hover { background: var(--surface); }
+  .export-icon { font-size: 20px; }
+  .export-info { flex: 1; }
+  .export-name { font-size: 13px; font-weight: 600; }
+  .export-desc { font-size: 11px; color: var(--ink-dim); }
+
+  /* 告警横幅 */
+  .alert-banner {
+    background: var(--red-bg);
+    border: 1px solid rgba(217,79,61,.2);
+    border-radius: var(--r);
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--red);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    display: none;
+  }
+  .alert-banner.visible { display: flex; }
+
+  /* 洞察提醒横幅 */
+  .insight-banner {
+    background: var(--blue-bg);
+    border: 1px solid rgba(37,99,168,.18);
+    border-radius: var(--r);
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--blue);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    display: none;
+    margin: 0 20px 0 20px;
+    margin-top: 8px;
+  }
+  .insight-banner.visible { display: flex; }
+
+  /* 每日回顾弹窗 */
+  .review-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .review-overlay.visible { display: flex; }
+  .review-modal {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 28px 24px 20px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: var(--shadow-md);
+    position: relative;
+  }
+  .review-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .review-date {
+    font-size: 12px;
+    color: var(--ink-dim);
+    margin-bottom: 16px;
+  }
+  .review-trigger-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--red);
+    background: var(--red-bg);
+    padding: 3px 10px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+  .review-body {
+    font-size: 15px;
+    line-height: 1.85;
+    color: var(--ink);
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin-bottom: 20px;
+    max-height: 280px;
+    overflow-y: auto;
+  }
+  .review-body .tag { color: var(--blue); font-weight: 600; }
+  .review-prompt {
+    background: var(--surface);
+    border-radius: var(--r);
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--ink-dim);
+    margin-bottom: 16px;
+    line-height: 1.6;
+    border-left: 3px solid var(--amber);
+  }
+  .review-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .review-close-btn {
+    position: absolute;
+    top: 16px; right: 16px;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: var(--surface);
+    color: var(--ink-dim);
+    cursor: pointer;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .review-close-btn:hover { background: var(--border); }
+
+  /* 标签标注 */
+  .note-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  .note-tag {
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: var(--tag-bg);
+    color: var(--tag-ink);
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  /* 弹窗 */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.4);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.visible { display: flex; }
+  .modal {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 24px;
+    width: 420px;
+    box-shadow: var(--shadow-md);
+  }
+  .modal h3 { font-size: 16px; margin-bottom: 6px; }
+  .modal p { font-size: 13px; color: var(--ink-dim); margin-bottom: 16px; }
+  .modal input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 10px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    margin-bottom: 12px;
+  }
+  .modal input:focus { border-color: var(--ink); }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .modal-note { font-size: 11px; color: var(--ink-faint); margin-top: 8px; }
+
+  /* 滚动条美化 */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* 响应式 */
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; grid-template-rows: 52px auto 1fr; }
+    .sidebar { display: none; }
+    .panel { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- 顶栏 -->
+  <header class="topbar">
+    <div class="topbar-brand">⬡ <span>灵感库</span> · 知识周转率系统</div>
+    <div class="topbar-stats">
+      <span>待处理 <b id="stat-pending">0</b></span>
+      <span>已加工 <b id="stat-done">0</b></span>
+      <span>已过期 <b id="stat-expired">0</b> 🔴</span>
+    </div>
+    <button class="api-btn" onclick="showApiModal()">
+      <span class="api-dot" id="api-dot"></span>Claude API
+    </button>
+  </header>
+
+  <!-- 左侧栏 -->
+  <aside class="sidebar">
+    <div class="sidebar-section">视图</div>
+    <div class="sidebar-item active" data-view="all" onclick="setView('all', this)">
+      📋 全部笔记 <span class="sidebar-count" id="cnt-all">0</span>
+    </div>
+    <div class="sidebar-item" data-view="pending" onclick="setView('pending', this)">
+      ⏳ 待处理 <span class="sidebar-count" id="cnt-pending">0</span>
+    </div>
+    <div class="sidebar-item" data-view="expired" onclick="setView('expired', this)">
+      🔴 已过期 <span class="sidebar-count" id="cnt-expired">0</span>
+    </div>
+    <div class="sidebar-item" data-view="done" onclick="setView('done', this)">
+      ✅ 已加工 <span class="sidebar-count" id="cnt-done">0</span>
+    </div>
+    <div class="sidebar-item" data-view="deleted" onclick="setView('deleted', this)">
+      🗑️ 已清理 <span class="sidebar-count" id="cnt-deleted">0</span>
+    </div>
+
+    <div class="sidebar-section" style="margin-top:8px">标签</div>
+    <div class="tag-list" id="tag-list"></div>
+
+    <div class="turnover-gauge">
+      <div class="gauge-label">📊 知识周转率</div>
+      <div class="gauge-bar"><div class="gauge-fill" id="gauge-fill" style="width:0%"></div></div>
+      <div class="gauge-pct" id="gauge-pct">0%</div>
+      <div class="gauge-sub">目标 ≥60% · 健康标准</div>
+    </div>
+  </aside>
+
+  <!-- 中间主体 -->
+  <main class="main">
+    <!-- 捕获区 -->
+    <div class="capture-box">
+      <div class="capture-header">投入灵感 · 必须满足其中一条</div>
+      <div class="capture-triggers">
+        <div class="trigger-chip" data-t="不认同" onclick="toggleTrigger(this)">🔴 我不认同这个观点</div>
+        <div class="trigger-chip" data-t="讲不清" onclick="toggleTrigger(this)">🔴 我以为懂了但讲不清</div>
+        <div class="trigger-chip" data-t="困惑" onclick="toggleTrigger(this)">🔴 这个现象让我困惑</div>
+        <div class="trigger-chip" data-t="动摇" onclick="toggleTrigger(this)">🔴 旧认知被动摇了</div>
+      </div>
+      <textarea id="capture-input" placeholder="写下让你不舒服的那个想法... 用 #标签 分类" rows="3"></textarea>
+      <div class="capture-footer">
+        <div class="capture-hint"><kbd>Ctrl</kbd>+<kbd>Enter</kbd> 快速投入</div>
+        <div class="capture-actions">
+          <button class="btn btn-secondary" onclick="clearCapture()">清空</button>
+          <button class="btn btn-primary" onclick="addNote()">投入灵感库 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 过期告警 -->
+    <div class="alert-banner" id="expire-banner">
+      ⚠️ <span id="expire-msg"></span>
+      <button class="btn btn-red" style="margin-left:auto;padding:4px 10px;font-size:12px" onclick="purgeExpired()">一键清理</button>
+    </div>
+
+    <!-- 洞察提醒横幅 -->
+    <div class="insight-banner" id="insight-banner">
+      🔍 <span id="insight-banner-msg"></span>
+      <button class="btn btn-primary" style="margin-left:auto;padding:4px 12px;font-size:12px" onclick="goToInsight()">立即洞察</button>
+      <button onclick="document.getElementById('insight-banner').classList.remove('visible')" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:16px;padding:0 4px">×</button>
+    </div>
+
+    <!-- 筛选栏 -->
+    <div class="filter-bar">
+      <div class="filter-tabs">
+        <div class="filter-tab active" onclick="setSort('new', this)">最新</div>
+        <div class="filter-tab" onclick="setSort('old', this)">最旧</div>
+        <div class="filter-tab" onclick="setSort('urgent', this)">紧急优先</div>
+      </div>
+      <input class="filter-search" type="text" placeholder="🔍 搜索笔记..." id="search-input" oninput="renderNotes()">
+    </div>
+
+    <!-- 笔记流 -->
+    <div class="notes-stream" id="notes-stream">
+      <div class="empty-state">
+        <div class="empty-icon">⬡</div>
+        <p>灵感库为空，脑子干净 = 状态最好</p>
+        <p style="margin-top:6px;font-size:12px">选择一个触发点，写下让你不舒服的想法</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- 右侧面板 -->
+  <aside class="panel">
+    <div class="panel-tabs">
+      <div class="panel-tab active" onclick="setPanelTab('ai', this)">🧠 AI加工</div>
+      <div class="panel-tab" onclick="setPanelTab('insight', this)">🔍 洞察</div>
+      <div class="panel-tab" onclick="setPanelTab('detail', this)">📄 详情</div>
+      <div class="panel-tab" onclick="setPanelTab('export', this)">📤 导出</div>
+    </div>
+
+    <!-- AI加工面板 -->
+    <div class="panel-content" id="tab-ai">
+      <div style="margin-bottom:12px;font-size:12px;color:var(--ink-dim)">
+        选中一条笔记，然后执行以下加工流程
+      </div>
+
+      <div id="no-selection-hint" style="text-align:center;padding:40px 0;color:var(--ink-faint);font-size:13px">
+        ← 点击一条笔记开始加工
+      </div>
+
+      <div id="ai-tools" style="display:none">
+        <div class="ai-section">
+          <div class="ai-section-title">环一 · 门禁四问</div>
+          <button class="ai-btn" id="btn-gate" onclick="runGateCheck()">
+            🚪 执行门禁四问
+          </button>
+          <div class="gatecheck" id="gatecheck-panel">
+            <div class="gatecheck-q"><span class="gatecheck-num">Q1</span>10秒内能说出反例吗？（可证伪）</div>
+            <div class="gatecheck-q"><span class="gatecheck-num">Q2</span>能同时解释两个不相干现象吗？（穿透力）</div>
+            <div class="gatecheck-q"><span class="gatecheck-num">Q3</span>最聪明的人会质疑哪里？（最强反方）</div>
+            <div class="gatecheck-q"><span class="gatecheck-num">Q4</span>之前讲过类似的？这次新在哪？（迭代）</div>
+          </div>
+          <div class="ai-result" id="result-gate"></div>
+        </div>
+
+        <div class="ai-section">
+          <div class="ai-section-title">环二 · 7刃切割</div>
+          <button class="ai-btn" id="btn-spark" onclick="runSpark()">
+            ⚡ 灵感引擎发散
+          </button>
+          <div class="ai-result" id="result-spark"></div>
+        </div>
+
+        <div class="ai-section">
+          <div class="ai-section-title">环三 · 8条规则挖矿</div>
+          <button class="ai-btn" id="btn-mine" onclick="runMine()">
+            ⛏️ 提炼锋利洞见
+          </button>
+          <div class="ai-result" id="result-mine"></div>
+        </div>
+
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="btn btn-secondary" style="flex:1;font-size:12px" onclick="markProcessed()">✅ 标记已加工</button>
+          <button class="btn btn-secondary" style="flex:1;font-size:12px;color:var(--red)" onclick="deleteSelected()">🗑️ 无情删除</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI洞察面板 -->
+    <div class="panel-content" id="tab-insight" style="display:none">
+      <div style="font-size:12px;color:var(--ink-dim);margin-bottom:14px;line-height:1.7">
+        跨笔记模式识别，找出你这段时间的<b style="color:var(--ink)">思考轨迹、内在矛盾与演化方向</b>
+      </div>
+
+      <div class="ai-section">
+        <div class="ai-section-title">时间范围</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+          <div class="filter-tab active" id="range-7" onclick="setInsightRange(7, this)" style="border:1px solid var(--border);border-radius:20px">本周</div>
+          <div class="filter-tab" id="range-30" onclick="setInsightRange(30, this)" style="border:1px solid var(--border);border-radius:20px">本月</div>
+          <div class="filter-tab" id="range-0" onclick="setInsightRange(0, this)" style="border:1px solid var(--border);border-radius:20px">全部</div>
+        </div>
+        <div id="insight-note-count" style="font-size:12px;color:var(--ink-dim);margin-bottom:10px"></div>
+      </div>
+
+      <div class="ai-section">
+        <div class="ai-section-title">洞察模式</div>
+        <button class="ai-btn" onclick="runInsight('full')">
+          🧭 完整思考轨迹报告
+        </button>
+        <button class="ai-btn" onclick="runInsight('pattern')">
+          🔁 重复信号 · 找出你的执念
+        </button>
+        <button class="ai-btn" onclick="runInsight('blind')">
+          🕳️ 盲点审查 · 你没看到的
+        </button>
+        <button class="ai-btn" onclick="runInsight('connect')">
+          🕸️ 知识连接 · 找隐藏关联
+        </button>
+      </div>
+
+      <div class="ai-result" id="result-insight" style="max-height:none;font-size:13px;line-height:1.85"></div>
+
+      <div id="insight-actions" style="display:none;margin-top:10px;gap:6px;display:none">
+        <button class="btn btn-secondary" style="width:100%;font-size:12px" onclick="exportInsight()">📋 复制洞察报告</button>
+      </div>
+    </div>
+
+    <!-- 详情面板 -->
+    <div class="panel-content" id="tab-detail" style="display:none">
+      <div id="detail-empty" style="text-align:center;padding:40px 0;color:var(--ink-faint);font-size:13px">
+        ← 点击一条笔记查看详情
+      </div>
+      <div id="detail-content" style="display:none">
+        <div style="font-size:11px;color:var(--ink-dim);margin-bottom:12px" id="detail-meta"></div>
+        <div id="detail-trigger" style="margin-bottom:10px"></div>
+        <div id="detail-body" style="font-size:14px;line-height:1.8;white-space:pre-wrap;word-break:break-all"></div>
+        <div id="detail-tags" style="margin-top:12px"></div>
+        <hr style="margin:16px 0;border:none;border-top:1px solid var(--border)">
+        <div style="font-size:12px;color:var(--ink-dim)">笔记ID：<span id="detail-id" style="font-family:monospace"></span></div>
+      </div>
+    </div>
+
+    <!-- 导出面板 -->
+    <div class="panel-content" id="tab-export" style="display:none">
+      <div class="ai-section-title">导出格式</div>
+      <div class="export-item" onclick="exportData('json')">
+        <div class="export-icon">📦</div>
+        <div class="export-info">
+          <div class="export-name">JSON 全量备份</div>
+          <div class="export-desc">包含所有笔记和元数据，可再次导入</div>
+        </div>
+      </div>
+      <div class="export-item" onclick="exportData('markdown')">
+        <div class="export-icon">📝</div>
+        <div class="export-info">
+          <div class="export-name">Markdown · 灵感库</div>
+          <div class="export-desc">适配Obsidian PARA目录结构</div>
+        </div>
+      </div>
+      <div class="export-item" onclick="exportData('active')">
+        <div class="export-icon">⚡</div>
+        <div class="export-info">
+          <div class="export-name">仅导出待处理</div>
+          <div class="export-desc">过滤已清理的，只留活跃笔记</div>
+        </div>
+      </div>
+      <hr style="margin:12px 0;border:none;border-top:1px solid var(--border)">
+      <div class="ai-section-title">导入</div>
+      <button class="btn btn-secondary" style="width:100%" onclick="document.getElementById('import-file').click()">
+        📥 从JSON恢复备份
+      </button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)">
+    </div>
+  </aside>
+</div>
+
+<!-- 每日回顾弹窗 -->
+<div class="review-overlay" id="review-overlay">
+  <div class="review-modal">
+    <button class="review-close-btn" onclick="closeReview()">×</button>
+    <div class="review-eyebrow">✦ 每日回顾</div>
+    <div class="review-date" id="review-date"></div>
+    <div id="review-trigger-badge"></div>
+    <div class="review-body" id="review-body"></div>
+    <div class="review-prompt" id="review-prompt"></div>
+    <div class="review-actions">
+      <button class="btn btn-secondary" style="flex:1" onclick="shuffleReview()">换一条</button>
+      <button class="btn btn-primary" style="flex:1" onclick="closeReview()">开始今天</button>
+    </div>
+  </div>
+</div>
+
+<!-- API Key 弹窗 -->
+<div class="modal-overlay" id="api-modal">
+  <div class="modal">
+    <h3>🔑 设置 Claude API Key</h3>
+    <p>Key 仅存在浏览器本地（localStorage），不会上传任何服务器。</p>
+    <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." autocomplete="off">
+    <div style="font-size:12px;color:var(--ink-dim);margin-bottom:12px">
+      获取地址：<a href="https://console.anthropic.com" target="_blank" style="color:var(--blue)">console.anthropic.com</a>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeApiModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveApiKey()">保存</button>
+    </div>
+    <div class="modal-note">⚠️ AI加工功能（门禁四问、7刃切割、挖矿）需要API Key才能使用。笔记捕获和管理功能无需Key。</div>
+  </div>
+</div>
+
+<script>
+// ── 数据层 ──────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'brain_notes_v2';
+const API_KEY_KEY = 'claude_api_key';
+const EXPIRE_DAYS = 14;
+
+let notes = [];
+let currentView = 'all';
+let currentSort = 'new';
+let currentTag = null;
+let selectedNoteId = null;
+let currentPanelTab = 'ai';
+let selectedTrigger = null;
+
+function loadNotes() {
+  try {
+    notes = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  } catch { notes = []; }
+}
+
+function saveNotes() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+}
+
+function getApiKey() {
+  return localStorage.getItem(API_KEY_KEY) || '';
+}
+
+// ── 工具函数 ──────────────────────────────────────────────────────────
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+function daysSince(dateStr) {
+  const ms = Date.now() - new Date(dateStr).getTime();
+  return Math.floor(ms / 86400000);
+}
+
+function parseTags(text) {
+  const tags = [];
+  const re = /#([\u4e00-\u9fa5\w]+)/g;
+  let m;
+  while ((m = re.exec(text)) !== null) tags.push(m[1]);
+  return [...new Set(tags)];
+}
+
+function renderTaggedText(text) {
+  return text.replace(/#([\u4e00-\u9fa5\w]+)/g, '<span class="tag">#$1</span>');
+}
+
+// ── 视图与筛选 ──────────────────────────────────────────────────────
+function setView(view, el) {
+  currentView = view;
+  currentTag = null;
+  document.querySelectorAll('.sidebar-item').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.tag-item').forEach(e => e.classList.remove('active'));
+  renderNotes();
+}
+
+function setSort(sort, el) {
+  currentSort = sort;
+  document.querySelectorAll('.filter-tab').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  renderNotes();
+}
+
+function setTagFilter(tag, el) {
+  currentTag = currentTag === tag ? null : tag;
+  document.querySelectorAll('.tag-item').forEach(e => e.classList.remove('active'));
+  if (currentTag) el.classList.add('active');
+  document.querySelectorAll('.sidebar-item').forEach(e => e.classList.remove('active'));
+  currentView = 'all';
+  renderNotes();
+}
+
+function setPanelTab(tab, el) {
+  currentPanelTab = tab;
+  document.querySelectorAll('.panel-tab').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-ai').style.display = tab === 'ai' ? 'block' : 'none';
+  document.getElementById('tab-insight').style.display = tab === 'insight' ? 'block' : 'none';
+  document.getElementById('tab-detail').style.display = tab === 'detail' ? 'block' : 'none';
+  document.getElementById('tab-export').style.display = tab === 'export' ? 'block' : 'none';
+  if (tab === 'detail') updateDetailPanel();
+  if (tab === 'insight') updateInsightCount();
+}
+
+// ── 渲染 ─────────────────────────────────────────────────────────────
+function getFilteredNotes() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  let filtered = notes.filter(n => {
+    if (currentView === 'pending') return !n.deleted && !n.processed;
+    if (currentView === 'expired') return !n.deleted && !n.processed && daysSince(n.createdAt) >= EXPIRE_DAYS;
+    if (currentView === 'done') return !n.deleted && n.processed;
+    if (currentView === 'deleted') return n.deleted;
+    return !n.deleted;
+  });
+  if (currentTag) filtered = filtered.filter(n => parseTags(n.text).includes(currentTag));
+  if (search) filtered = filtered.filter(n => n.text.toLowerCase().includes(search) || (n.trigger||'').toLowerCase().includes(search));
+  if (currentSort === 'new') filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  else if (currentSort === 'old') filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  else {
+    filtered.sort((a, b) => {
+      const da = daysSince(a.createdAt), db = daysSince(b.createdAt);
+      return db - da;
+    });
+  }
+  return filtered;
+}
+
+function renderNotes() {
+  updateStats();
+  updateTagList();
+  updateGauge();
+  updateExpireBanner();
+
+  const stream = document.getElementById('notes-stream');
+  const filtered = getFilteredNotes();
+
+  if (filtered.length === 0) {
+    stream.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">${currentView === 'deleted' ? '🗑️' : '⬡'}</div>
+      <p>${currentView === 'deleted' ? '清理记录为空' : '这里没有笔记'}</p>
+      <p style="margin-top:6px;font-size:12px">${currentView === 'all' ? '选择触发点，写下让你不舒服的想法' : ''}</p>
+    </div>`;
+    return;
+  }
+
+  stream.innerHTML = filtered.map(note => {
+    const days = daysSince(note.createdAt);
+    const expired = !note.processed && days >= EXPIRE_DAYS;
+    const ageClass = note.processed ? 'done' : days >= EXPIRE_DAYS ? 'danger' : days >= 7 ? 'warn' : 'safe';
+    const ageLabel = note.processed ? '已加工' : days === 0 ? '今天' : `${days}天`;
+    const tags = parseTags(note.text);
+
+    return `<div class="note-card ${expired && !note.deleted ? 'expired' : ''} ${note.processed ? 'processed' : ''} ${note.id === selectedNoteId ? 'selected' : ''}"
+      onclick="selectNote('${note.id}')">
+      ${note.trigger ? `<div class="note-trigger">🔴 ${note.trigger}</div>` : ''}
+      <div class="note-body">${renderTaggedText(note.text.length > 200 ? note.text.slice(0, 200) + '…' : note.text)}</div>
+      ${tags.length ? `<div class="note-tags">${tags.map(t => `<span class="note-tag">#${t}</span>`).join('')}</div>` : ''}
+      <div class="note-meta">
+        <span class="note-age ${ageClass}">${ageLabel}</span>
+        <span>${new Date(note.createdAt).toLocaleDateString('zh-CN')}</span>
+        <div class="note-actions">
+          ${!note.processed && !note.deleted ? `<button class="note-action-btn" onclick="event.stopPropagation();quickProcess('${note.id}')">✅ 加工</button>` : ''}
+          ${!note.deleted ? `<button class="note-action-btn danger" onclick="event.stopPropagation();deleteNote('${note.id}')">删除</button>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateStats() {
+  const active = notes.filter(n => !n.deleted);
+  const pending = active.filter(n => !n.processed);
+  const done = active.filter(n => n.processed);
+  const expired = pending.filter(n => daysSince(n.createdAt) >= EXPIRE_DAYS);
+  const deleted = notes.filter(n => n.deleted);
+
+  document.getElementById('stat-pending').textContent = pending.length;
+  document.getElementById('stat-done').textContent = done.length;
+  document.getElementById('stat-expired').textContent = expired.length;
+  document.getElementById('cnt-all').textContent = active.length;
+  document.getElementById('cnt-pending').textContent = pending.length;
+  document.getElementById('cnt-expired').textContent = expired.length;
+  document.getElementById('cnt-done').textContent = done.length;
+  document.getElementById('cnt-deleted').textContent = deleted.length;
+}
+
+function updateGauge() {
+  const active = notes.filter(n => !n.deleted);
+  const done = active.filter(n => n.processed).length;
+  const total = active.length;
+  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+  document.getElementById('gauge-fill').style.width = pct + '%';
+  document.getElementById('gauge-pct').textContent = pct + '%';
+}
+
+function updateTagList() {
+  const active = notes.filter(n => !n.deleted);
+  const tagMap = {};
+  active.forEach(n => parseTags(n.text).forEach(t => { tagMap[t] = (tagMap[t]||0)+1; }));
+  const tagList = document.getElementById('tag-list');
+  const entries = Object.entries(tagMap).sort((a,b) => b[1]-a[1]);
+  tagList.innerHTML = entries.length === 0
+    ? '<div style="padding:5px 10px;font-size:12px;color:var(--ink-faint)">还没有标签</div>'
+    : entries.map(([tag, cnt]) =>
+        `<div class="tag-item ${currentTag===tag?'active':''}" onclick="setTagFilter('${tag}', this)">
+          # ${tag} <span style="margin-left:auto;color:var(--ink-faint);font-size:11px">${cnt}</span>
+        </div>`
+      ).join('');
+}
+
+function updateExpireBanner() {
+  const expired = notes.filter(n => !n.deleted && !n.processed && daysSince(n.createdAt) >= EXPIRE_DAYS);
+  const banner = document.getElementById('expire-banner');
+  if (expired.length > 0) {
+    banner.classList.add('visible');
+    document.getElementById('expire-msg').textContent =
+      `${expired.length} 条笔记已滞留超 ${EXPIRE_DAYS} 天，未通过门禁验证，建议立即清理`;
+  } else {
+    banner.classList.remove('visible');
+  }
+}
+
+// ── 操作 ─────────────────────────────────────────────────────────────
+function toggleTrigger(el) {
+  const t = el.dataset.t;
+  if (selectedTrigger === t) {
+    selectedTrigger = null;
+    el.classList.remove('selected');
+  } else {
+    selectedTrigger = t;
+    document.querySelectorAll('.trigger-chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+}
+
+function addNote() {
+  const input = document.getElementById('capture-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const note = {
+    id: genId(),
+    text,
+    trigger: selectedTrigger,
+    createdAt: new Date().toISOString(),
+    processed: false,
+    deleted: false,
+    aiResults: {}
+  };
+
+  notes.unshift(note);
+  saveNotes();
+  clearCapture();
+  renderNotes();
+  selectNote(note.id);
+}
+
+function clearCapture() {
+  document.getElementById('capture-input').value = '';
+  selectedTrigger = null;
+  document.querySelectorAll('.trigger-chip').forEach(c => c.classList.remove('selected'));
+}
+
+function selectNote(id) {
+  selectedNoteId = id;
+  document.querySelectorAll('.note-card').forEach(c => c.classList.remove('selected'));
+  event && event.currentTarget && event.currentTarget.classList.add('selected');
+  renderNotes();
+  showAiTools();
+  updateDetailPanel();
+}
+
+function showAiTools() {
+  document.getElementById('no-selection-hint').style.display = 'none';
+  document.getElementById('ai-tools').style.display = 'block';
+  // 清空上次结果
+  ['gate','spark','mine'].forEach(k => {
+    const el = document.getElementById('result-'+k);
+    el.classList.remove('visible','loading');
+    el.textContent = '';
+  });
+  document.getElementById('gatecheck-panel').classList.remove('visible');
+}
+
+function updateDetailPanel() {
+  const note = notes.find(n => n.id === selectedNoteId);
+  document.getElementById('detail-empty').style.display = note ? 'none' : 'block';
+  document.getElementById('detail-content').style.display = note ? 'block' : 'none';
+  if (!note) return;
+  const days = daysSince(note.createdAt);
+  document.getElementById('detail-meta').textContent =
+    `创建于 ${new Date(note.createdAt).toLocaleString('zh-CN')} · ${days} 天前`;
+  document.getElementById('detail-trigger').innerHTML = note.trigger
+    ? `<div class="note-trigger">🔴 ${note.trigger}</div>` : '';
+  document.getElementById('detail-body').innerHTML = renderTaggedText(note.text);
+  const tags = parseTags(note.text);
+  document.getElementById('detail-tags').innerHTML = tags.length
+    ? `<div class="note-tags">${tags.map(t=>`<span class="note-tag">#${t}</span>`).join('')}</div>` : '';
+  document.getElementById('detail-id').textContent = note.id;
+}
+
+function deleteNote(id) {
+  const note = notes.find(n => n.id === id);
+  if (!note) return;
+  note.deleted = true;
+  note.deletedAt = new Date().toISOString();
+  saveNotes();
+  if (selectedNoteId === id) { selectedNoteId = null; document.getElementById('ai-tools').style.display='none'; document.getElementById('no-selection-hint').style.display='block'; }
+  renderNotes();
+}
+
+function deleteSelected() {
+  if (!selectedNoteId) return;
+  deleteNote(selectedNoteId);
+}
+
+function quickProcess(id) {
+  const note = notes.find(n => n.id === id);
+  if (!note) return;
+  note.processed = true;
+  note.processedAt = new Date().toISOString();
+  saveNotes();
+  renderNotes();
+}
+
+function markProcessed() {
+  if (!selectedNoteId) return;
+  quickProcess(selectedNoteId);
+}
+
+function purgeExpired() {
+  const expired = notes.filter(n => !n.deleted && !n.processed && daysSince(n.createdAt) >= EXPIRE_DAYS);
+  expired.forEach(n => { n.deleted = true; n.deletedAt = new Date().toISOString(); n.deleteReason = 'expired'; });
+  saveNotes();
+  renderNotes();
+}
+
+// ── Claude API 调用 ───────────────────────────────────────────────────
+async function callClaude(prompt) {
+  const key = getApiKey();
+  if (!key) { showApiModal(); throw new Error('需要API Key'); }
+
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1500,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error?.message || `API错误 ${resp.status}`);
+  }
+  const data = await resp.json();
+  return data.content[0].text;
+}
+
+function setResult(id, text) {
+  const el = document.getElementById('result-'+id);
+  el.classList.remove('loading');
+  el.classList.add('visible');
+  el.textContent = text;
+}
+
+function setLoading(id) {
+  const el = document.getElementById('result-'+id);
+  el.innerHTML = '<div class="spinner"></div> AI 正在思考中...';
+  el.classList.add('visible', 'loading');
+}
+
+async function runGateCheck() {
+  const note = notes.find(n => n.id === selectedNoteId);
+  if (!note) return;
+  document.getElementById('gatecheck-panel').classList.add('visible');
+  setLoading('gate');
+  const prompt = `你是一名敌意审查官，执行知识周转率系统的"门禁四问"。
+
+待审查的笔记内容：
+"""
+${note.text}
+"""
+
+请严格对以下四个问题逐一分析，给出具体判断（不是笼统评价）：
+
+Q1【可证伪测试】：这个观点10秒内能找到反例吗？给出具体反例或说明攻不动的理由。
+Q2【穿透力测试】：这个观点能同时解释两个不相干的现象吗？举出两个具体例子验证。
+Q3【最强反方测试】：持反方观点的最聪明的人会如何质疑这个想法？给出钢人版反方论点。
+Q4【迭代检查】：这个洞见相比常见认知，新在哪里？有没有更本质的表达？
+
+最后给出总结判断：通过（值得深化）/ 删除（无法通过门禁）/ 修改方向（给出具体修改建议）。
+
+禁止使用：赋能、打造、抓手、闭环、底层逻辑、维度、沉淀、生态。`;
+  try {
+    const result = await callClaude(prompt);
+    setResult('gate', result);
+    note.aiResults = note.aiResults || {};
+    note.aiResults.gate = result;
+    saveNotes();
+  } catch(e) {
+    setResult('gate', '❌ 错误：' + e.message);
+  }
+}
+
+async function runSpark() {
+  const note = notes.find(n => n.id === selectedNoteId);
+  if (!note) return;
+  setLoading('spark');
+  const prompt = `你是洞见压缩机，执行"7刃切割"灵感引擎。
+
+待加工的灵感：
+"""
+${note.text}
+"""
+
+从以下7个维度对这个灵感进行精密切割，每个维度给出1-2个具体的、让人意外的角度（不是解释，是新视角）：
+
+【悖论】表面矛盾背后的真实本质是什么？
+【杠杆】用极小成本撬动巨大改变的支点在哪？
+【溯源】这个现象最初的底层驱动力是什么？
+【反转】如果把常规逻辑完全倒过来会怎样？
+【类比】在完全不相干的领域里，有什么相同的规律？
+【笨拙】放弃聪明人的投机，用最笨、最扎实的方法怎么做？
+【尺度】放大到十年或缩小到一天，这个判断还成立吗？
+
+最后标出：哪一刃让你意外，可以作为内容核心？
+
+态度：敌意审查，不附和，只给判断，不给鼓励。
+禁词：赋能、打造、抓手、闭环、底层逻辑、深度、维度、拉齐、沉淀、生态。`;
+  try {
+    const result = await callClaude(prompt);
+    setResult('spark', result);
+    note.aiResults = note.aiResults || {};
+    note.aiResults.spark = result;
+    saveNotes();
+  } catch(e) {
+    setResult('spark', '❌ 错误：' + e.message);
+  }
+}
+
+async function runMine() {
+  const note = notes.find(n => n.id === selectedNoteId);
+  if (!note) return;
+  setLoading('mine');
+  const sparkResult = note.aiResults?.spark || '';
+  const prompt = `你是洞见压缩机，执行"8条规则挖矿"，将灵感提炼为锋利的核心判断。
+
+原始灵感：
+"""
+${note.text}
+"""
+
+${sparkResult ? `7刃切割结果（参考）：\n"""\n${sparkResult}\n"""\n` : ''}
+
+按照以下8条规则严格执行，产出一段300-500字的核心判断：
+
+1. 选矿：只围绕"矿"（独特判断）展开，丢掉"渣"（正确的废话）
+2. 对抗审查：每个判断立即10秒推翻测试，攻不动才保留，把最强反对理由写进正文
+3. 钢人测试：反方以最强形态出现，必须让持该观点的人读完说"就是这意思"
+4. 画面测试：每句话读者脑中必须浮现具体画面，不能有抽象概念堆砌
+5. 删词测试：逐词检视，删掉意思不变的词，连续3个以上形容词至少删2个
+6. 禁词检查：赋能/打造/抓手/闭环/底层逻辑/深度/维度/拉齐/沉淀/生态，全部替换
+7. 结构检查：一段一判断，段落之间只允许因果/转折/递进，禁止并列堆砌
+8. 标题自检：必须是判断句（❌"关于X的思考" → ✅"多数X建议是教你把废话说得更好听"）
+
+输出格式：
+【标题（判断句）】
+【正文（300-500字）】
+【一句截图句：最值得截图发朋友圈的那句话】`;
+  try {
+    const result = await callClaude(prompt);
+    setResult('mine', result);
+    note.aiResults = note.aiResults || {};
+    note.aiResults.mine = result;
+    saveNotes();
+  } catch(e) {
+    setResult('mine', '❌ 错误：' + e.message);
+  }
+}
+
+// ── API Key 管理 ──────────────────────────────────────────────────────
+function showApiModal() {
+  document.getElementById('api-key-input').value = getApiKey();
+  document.getElementById('api-modal').classList.add('visible');
+}
+function closeApiModal() { document.getElementById('api-modal').classList.remove('visible'); }
+function saveApiKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  localStorage.setItem(API_KEY_KEY, key);
+  updateApiDot();
+  closeApiModal();
+}
+function updateApiDot() {
+  const dot = document.getElementById('api-dot');
+  dot.classList.toggle('active', !!getApiKey());
+}
+
+// ── AI 洞察 ───────────────────────────────────────────────────────────
+let insightRange = 7; // 默认本周
+let lastInsightText = '';
+
+function setInsightRange(days, el) {
+  insightRange = days;
+  document.querySelectorAll('#tab-insight .filter-tab').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  updateInsightCount();
+}
+
+function getInsightNotes() {
+  const active = notes.filter(n => !n.deleted);
+  if (insightRange === 0) return active;
+  const cutoff = Date.now() - insightRange * 86400000;
+  return active.filter(n => new Date(n.createdAt).getTime() >= cutoff);
+}
+
+function updateInsightCount() {
+  const ns = getInsightNotes();
+  const el = document.getElementById('insight-note-count');
+  if (!el) return;
+  el.textContent = ns.length === 0
+    ? '⚠️ 当前时间范围内没有笔记'
+    : `当前范围：${ns.length} 条笔记 · 最早 ${ns.length ? new Date(Math.min(...ns.map(n=>new Date(n.createdAt)))).toLocaleDateString('zh-CN') : ''} 起`;
+}
+
+function buildNotesContext(ns) {
+  return ns.map((n, i) => {
+    const days = daysSince(n.createdAt);
+    const date = new Date(n.createdAt).toLocaleDateString('zh-CN');
+    return `[MEMO ${i+1}] (${date}，${days}天前${n.trigger ? '，触发点：'+n.trigger : ''})\n${n.text}`;
+  }).join('\n\n---\n\n');
+}
+
+async function runInsight(mode) {
+  const ns = getInsightNotes();
+  if (ns.length === 0) {
+    alert('当前时间范围内没有笔记，请调整时间范围或先添加笔记');
+    return;
+  }
+  if (ns.length < 2 && mode !== 'blind') {
+    alert('至少需要 2 条笔记才能做跨笔记分析');
+    return;
+  }
+
+  const ctx = buildNotesContext(ns);
+  const rangeLabel = insightRange === 0 ? '全部历史' : `最近${insightRange}天`;
+
+  const prompts = {
+    full: `你是一名思维系统分析师，任务是对用户${rangeLabel}的笔记进行深度模式识别，输出一份「思考轨迹报告」。
+
+以下是用户的全部笔记（按时间排序）：
+
+${ctx}
+
+---
+
+请按以下结构输出报告（全程中文，用「你」称呼用户，禁止用列表/标题格式，全部散文段落）：
+
+第一段：这段时间你的思考核心主题是什么？找出重复出现次数最多的信号（概念/词汇/关切），说明它为什么反复出现。引用具体笔记编号[MEMO N]。
+
+第二段：你的思考有没有演化？从早期到近期，判断点/关注方向发生了什么变化？是深化、转向还是分裂？引用具体笔记对比。
+
+第三段：你思维里有什么内在矛盾？找出两个看似对立但实际同时存在的信念或倾向。这个张力意味着什么？
+
+第四段：基于这些笔记，你可能有什么盲点——一个你没有直接写出来、但从思考模式里能推断出来的假设或认知缺口？
+
+结尾：用一句话概括「你正在成为什么样的思考者」。然后提一个反问，推动你继续往下想。
+
+禁词：赋能、打造、抓手、闭环、底层逻辑、深度、维度、拉齐、沉淀、生态、赋予。`,
+
+    pattern: `你是模式识别专家，任务是从用户的笔记中找出「重复信号」——那些被反复触碰、但可能还没被本人意识到的执念和主题。
+
+笔记内容（${rangeLabel}，共${ns.length}条）：
+
+${ctx}
+
+---
+
+输出要求（全中文散文，禁用列表/标题，引用[MEMO N]）：
+
+找出3个重复出现的核心信号（不是表面词汇，是深层关切）。对每个信号：说明它在哪些笔记里出现、以什么形式出现、为什么你反复回到这里——这个执念背后的恐惧或渴望是什么？
+
+最后：这3个执念之间有没有一个共同的根？如果有，它是什么？
+
+语气：温暖但不客气，直接说出来，不做铺垫。禁词同上。`,
+
+    blind: `你是认知审计师，任务是找出用户笔记中「没有写出来的东西」——那些被回避、被忽略、或被默认成理所当然的假设。
+
+笔记内容（${rangeLabel}，共${ns.length}条）：
+
+${ctx}
+
+---
+
+输出要求（全中文散文，引用[MEMO N]）：
+
+找出2-3个盲点或未被质疑的假设。对每个：说明这个假设在哪里隐藏、为什么它没有被直接质疑、如果这个假设是错的会怎样。
+
+最后：这些盲点合在一起，描绘了一个什么样的「认知边界」？突破这个边界需要问什么问题？
+
+不要鼓励，不要安慰。只给诊断。禁词同上。`,
+
+    connect: `你是知识图谱分析师，任务是在用户的笔记之间找出「隐藏连接」——那些表面无关、但本质相通的想法。
+
+笔记内容（${rangeLabel}，共${ns.length}条）：
+
+${ctx}
+
+---
+
+输出要求（全中文散文，引用[MEMO N]）：
+
+找出2-3组「隐藏连接」——每组至少涉及2条看似无关的笔记，说明它们在更深层次上共享什么逻辑或结构。
+
+然后：把这些连接综合起来，它们是否在指向一个你还没有明确表达过的「更大判断」？如果是，把它说出来。
+
+这不是总结，是推断。可以大胆，但要有依据。禁词同上。`
+  };
+
+  const resultEl = document.getElementById('result-insight');
+  resultEl.innerHTML = '<div class="spinner"></div> 正在分析 ' + ns.length + ' 条笔记，识别思考模式...';
+  resultEl.classList.add('visible', 'loading');
+
+  try {
+    const result = await callClaude(prompts[mode]);
+    resultEl.classList.remove('loading');
+    resultEl.classList.add('visible');
+    // 渲染：把[MEMO N]高亮
+    resultEl.innerHTML = result.replace(/\[MEMO (\d+)\]/g,
+      '<span style="background:var(--blue-bg);color:var(--blue);padding:1px 5px;border-radius:4px;font-size:11px;font-weight:700;font-family:monospace">[MEMO $1]</span>');
+    lastInsightText = result;
+    document.getElementById('insight-actions').style.display = 'block';
+  } catch(e) {
+    resultEl.classList.remove('loading');
+    resultEl.textContent = '❌ 错误：' + e.message;
+  }
+}
+
+function exportInsight() {
+  if (!lastInsightText) return;
+  navigator.clipboard.writeText(lastInsightText).then(() => {
+    const btn = document.querySelector('#insight-actions button');
+    const orig = btn.textContent;
+    btn.textContent = '✅ 已复制到剪贴板';
+    setTimeout(() => btn.textContent = orig, 2000);
+  });
+}
+
+// ── 导出/导入 ─────────────────────────────────────────────────────────
+function exportData(type) {
+  let data, filename, mime;
+
+  if (type === 'json') {
+    data = JSON.stringify(notes, null, 2);
+    filename = `灵感库备份_${new Date().toISOString().slice(0,10)}.json`;
+    mime = 'application/json';
+  } else if (type === 'markdown') {
+    const lines = ['# 灵感库 · 全量导出', `> 导出时间：${new Date().toLocaleString('zh-CN')}`, ''];
+    notes.filter(n => !n.deleted).forEach(n => {
+      const days = daysSince(n.createdAt);
+      lines.push(`## ${new Date(n.createdAt).toLocaleDateString('zh-CN')} · ${n.trigger || '未标注触发点'}`);
+      lines.push('');
+      lines.push(n.text);
+      lines.push('');
+      lines.push(`> 状态：${n.processed ? '✅ 已加工' : days >= 14 ? '🔴 已过期' : '⏳ 待处理'} · ${days}天前`);
+      lines.push('');
+      lines.push('---');
+      lines.push('');
+    });
+    data = lines.join('\n');
+    filename = `灵感库_${new Date().toISOString().slice(0,10)}.md`;
+    mime = 'text/markdown';
+  } else {
+    const active = notes.filter(n => !n.deleted && !n.processed);
+    data = JSON.stringify(active, null, 2);
+    filename = `灵感库_待处理_${new Date().toISOString().slice(0,10)}.json`;
+    mime = 'application/json';
+  }
+
+  const blob = new Blob([data], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!Array.isArray(imported)) throw new Error('格式不对');
+      const existIds = new Set(notes.map(n => n.id));
+      const newNotes = imported.filter(n => !existIds.has(n.id));
+      notes = [...notes, ...newNotes];
+      saveNotes();
+      renderNotes();
+      alert(`导入成功：${newNotes.length} 条新笔记，${imported.length - newNotes.length} 条已存在跳过`);
+    } catch(e) {
+      alert('导入失败：' + e.message);
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+// ── 键盘快捷键 ────────────────────────────────────────────────────────
+document.getElementById('capture-input').addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    addNote();
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeApiModal();
+    document.getElementById('api-modal').classList.remove('visible');
+  }
+});
+
+// 点击弹窗外部关闭
+document.getElementById('api-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeApiModal();
+});
+
+// ── 初始化 ────────────────────────────────────────────────────────────
+loadNotes();
+updateApiDot();
+renderNotes();
+updateInsightCount();
+checkDailyReview();
+checkInsightReminder();
+
+// ── 每日回顾 ──────────────────────────────────────────────────────────
+const REVIEW_KEY = 'brain_last_review_date';
+const INSIGHT_REMIND_KEY = 'brain_last_insight_date';
+const INSIGHT_REMIND_DAYS = 3;
+
+const reviewPrompts = [
+  '这个想法现在还成立吗？你有新的证据支持或推翻它？',
+  '如果现在重新写这条笔记，你会改哪句话？',
+  '这个想法和你最近在做的事有没有关联？',
+  '你当时为什么觉得这件事值得记下来？现在看还重要吗？',
+  '这条笔记里有没有一个假设你从来没有验证过？',
+  '如果把这个想法讲给一个比你聪明的人听，他会质疑哪里？',
+  '这个洞察有没有让你改变过任何一个实际行动？'
+];
+
+let reviewPool = [];
+
+function checkDailyReview() {
+  const active = notes.filter(n => !n.deleted);
+  if (active.length === 0) return;
+
+  const today = new Date().toDateString();
+  const lastReview = localStorage.getItem(REVIEW_KEY);
+  if (lastReview === today) return; // 今天已经看过了
+
+  // 优先选7天以上的老笔记，增加"时间感"
+  const old = active.filter(n => daysSince(n.createdAt) >= 7);
+  reviewPool = old.length >= 1 ? old : active;
+
+  showReview();
+}
+
+function showReview() {
+  if (reviewPool.length === 0) return;
+  const note = reviewPool[Math.floor(Math.random() * reviewPool.length)];
+  const days = daysSince(note.createdAt);
+  const prompt = reviewPrompts[Math.floor(Math.random() * reviewPrompts.length)];
+
+  document.getElementById('review-date').textContent =
+    `${new Date(note.createdAt).toLocaleDateString('zh-CN', {year:'numeric',month:'long',day:'numeric'})} · ${days} 天前的你写道`;
+  document.getElementById('review-trigger-badge').innerHTML = note.trigger
+    ? `<div class="review-trigger-badge">🔴 ${note.trigger}</div>` : '';
+  document.getElementById('review-body').innerHTML = renderTaggedText(note.text);
+  document.getElementById('review-prompt').textContent = '💭 ' + prompt;
+  document.getElementById('review-overlay').classList.add('visible');
+}
+
+function shuffleReview() {
+  showReview();
+}
+
+function closeReview() {
+  document.getElementById('review-overlay').classList.remove('visible');
+  localStorage.setItem(REVIEW_KEY, new Date().toDateString());
+}
+
+// ── 洞察提醒 ─────────────────────────────────────────────────────────
+function checkInsightReminder() {
+  const active = notes.filter(n => !n.deleted);
+  if (active.length < 3) return; // 笔记太少没意义
+
+  const lastInsight = localStorage.getItem(INSIGHT_REMIND_KEY);
+  if (!lastInsight) {
+    showInsightBanner('你已经积累了 ' + active.length + ' 条笔记，可以做第一次 AI 洞察了');
+    return;
+  }
+
+  const daysSinceLast = Math.floor((Date.now() - new Date(lastInsight).getTime()) / 86400000);
+  if (daysSinceLast >= INSIGHT_REMIND_DAYS) {
+    showInsightBanner(`距上次洞察已过 ${daysSinceLast} 天，又积累了新想法，现在跑一遍？`);
+  }
+}
+
+function showInsightBanner(msg) {
+  document.getElementById('insight-banner-msg').textContent = msg;
+  document.getElementById('insight-banner').classList.add('visible');
+}
+
+function goToInsight() {
+  document.getElementById('insight-banner').classList.remove('visible');
+  // 切换到洞察标签
+  const tab = document.querySelector('.panel-tab:nth-child(2)');
+  if (tab) setPanelTab('insight', tab);
+  // 记录本次洞察时间
+  localStorage.setItem(INSIGHT_REMIND_KEY, new Date().toISOString());
+}
+
+// 在runInsight结束后也记录时间
+const _origRunInsight = runInsight;
+window.runInsight = async function(mode) {
+  await _origRunInsight(mode);
+  localStorage.setItem(INSIGHT_REMIND_KEY, new Date().toISOString());
+};
+</script>
+</body>
+</html>
