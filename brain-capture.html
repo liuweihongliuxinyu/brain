@@ -1124,6 +1124,8 @@ const API_PROVIDER_KEY = 'brain_api_provider';
 const API_KEY_DEEPSEEK_KEY = 'brain_api_key_deepseek';
 const API_KEY_CLAUDE_KEY = 'claude_api_key'; // 兼容老用户的 key
 const EXPIRE_DAYS = 14;
+const GIST_TOKEN_KEY = 'brain_gist_token';
+const GIST_ID_KEY = 'brain_gist_id';
 
 let notes = [];
 let currentView = 'all';
@@ -2057,8 +2059,6 @@ function switchMobileTab(tab) {
 }
 
 // ── GitHub Gist 云同步 ────────────────────────────────────────────────
-const GIST_TOKEN_KEY = 'brain_gist_token';
-const GIST_ID_KEY = 'brain_gist_id';
 
 function getGistToken() { return localStorage.getItem(GIST_TOKEN_KEY) || ''; }
 function getGistId() { return localStorage.getItem(GIST_ID_KEY) || ''; }
