@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>灵感库 · 第二大脑</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a1a1a">
+<link rel="apple-touch-icon" href="icon.png">
 <style>
   /* ── 设计令牌 ── */
   :root {
@@ -1899,6 +1902,15 @@ window.runInsight = async function(mode) {
   await _origRunInsight(mode);
   localStorage.setItem(INSIGHT_REMIND_KEY, new Date().toISOString());
 };
+
+// ── PWA Service Worker 注册 ──────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Service Worker 注册成功', reg))
+      .catch(err => console.log('Service Worker 注册失败', err));
+  });
+}
 </script>
 </body>
 </html>
