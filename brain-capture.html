@@ -4,9 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>灵感库 · 第二大脑</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1a1a1a">
-<link rel="apple-touch-icon" href="icon.png">
 <style>
   /* ── 设计令牌 ── */
   :root {
@@ -709,89 +706,17 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-  /* 移动端底部导航栏 */
-  .mobile-nav {
-    display: none;
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    height: 56px;
-    background: var(--card);
-    border-top: 1px solid var(--border);
-    grid-template-columns: repeat(3, 1fr);
-    z-index: 150;
-  }
-  .mobile-nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    color: var(--ink-dim);
-    cursor: pointer;
-    gap: 3px;
-    user-select: none;
-  }
-  .mobile-nav-item.active {
-    color: var(--red);
-    font-weight: 600;
-  }
-  .mobile-nav-icon { font-size: 20px; }
-
   /* 响应式 */
   @media (max-width: 900px) {
-    .layout {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
-    }
-    .topbar {
-      flex-shrink: 0;
-    }
-    .mobile-nav { display: grid; }
-
-    /* 移动端：三栏全部绝对定位铺满，通过类名控制显隐 */
-    .sidebar {
-      display: none;
-      position: fixed;
-      top: 52px; left: 0; right: 0; bottom: 56px;
-      width: 100%; height: auto;
-      border: none;
-      z-index: 50;
-      overflow-y: auto;
-    }
-    .main {
-      display: none;
-      position: fixed;
-      top: 52px; left: 0; right: 0; bottom: 56px;
-      width: 100%; height: auto;
-      border: none;
-      z-index: 50;
-      overflow-y: auto;
-    }
-    .panel {
-      display: none;
-      position: fixed;
-      top: 52px; left: 0; right: 0; bottom: 56px;
-      width: 100%; height: auto;
-      border: none;
-      z-index: 50;
-      overflow-y: auto;
-      flex-direction: column;
-    }
-
-    .layout.show-sidebar .sidebar { display: flex !important; }
-    .layout.show-main .main { display: flex !important; }
-    .layout.show-panel .panel { display: flex !important; }
-
-    /* 面板内容在手机端撑满 */
-    .panel-content { flex: 1; overflow-y: auto; }
+    .layout { grid-template-columns: 1fr; grid-template-rows: 52px auto 1fr; }
+    .sidebar { display: none; }
+    .panel { display: none; }
   }
 </style>
 </head>
 <body>
 
-<div class="layout show-main">
+<div class="layout">
   <!-- 顶栏 -->
   <header class="topbar">
     <div class="topbar-brand">⬡ <span>灵感库</span> · 知识周转率系统</div>
@@ -801,7 +726,7 @@
       <span>已过期 <b id="stat-expired">0</b> 🔴</span>
     </div>
     <button class="api-btn" onclick="showApiModal()">
-      <span class="api-dot" id="api-dot"></span><span id="api-btn-text">Claude API</span>
+      <span class="api-dot" id="api-dot"></span>DeepSeek API
     </button>
   </header>
 
@@ -1030,45 +955,8 @@
         📥 从JSON恢复备份
       </button>
       <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)">
-      
-      <hr style="margin:12px 0;border:none;border-top:1px solid var(--border)">
-      <div class="ai-section-title">云端同步</div>
-      <div style="font-size:11px;color:var(--ink-dim);margin-bottom:8px">
-        使用 GitHub Gist 在多设备（电脑、手机）之间同步笔记。
-      </div>
-      <div id="gist-sync-setup">
-        <input type="password" id="gist-token-input" placeholder="输入 GitHub Token (需要 gist 权限)" style="width:100%;margin-bottom:8px;padding:8px;border:1px solid var(--border);border-radius:var(--r);outline:none;background:var(--surface);box-sizing:border-box">
-        <button class="btn btn-secondary" style="width:100%;font-size:12px" onclick="saveGistToken()">绑定 Token</button>
-        <div style="font-size:10px;color:var(--ink-faint);margin-top:4px">
-          获取：Settings -> Developer settings -> Personal access tokens (classic) -> Generate new token -> 勾选 gist 权限。
-        </div>
-      </div>
-      <div id="gist-sync-actions" style="display:none">
-        <div style="font-size:11px;color:var(--green);margin-bottom:8px;font-weight:600" id="gist-status-msg">已绑定 GitHub 云同步</div>
-        <button class="btn btn-primary" style="width:100%;font-size:12px;margin-bottom:6px" id="btn-sync" onclick="syncWithGist()">
-          🔄 立即智能同步
-        </button>
-        <button class="btn btn-secondary" style="width:100%;font-size:12px;color:var(--red)" onclick="clearGistToken()">
-          解绑同步
-        </button>
-      </div>
     </div>
   </aside>
-  <!-- 移动端底部导航栏 -->
-  <div class="mobile-nav">
-    <div class="mobile-nav-item active" data-tab="main" onclick="switchMobileTab('main')">
-      <span class="mobile-nav-icon">📋</span>
-      <span>笔记</span>
-    </div>
-    <div class="mobile-nav-item" data-tab="panel" onclick="switchMobileTab('panel')">
-      <span class="mobile-nav-icon">🧠</span>
-      <span>加工</span>
-    </div>
-    <div class="mobile-nav-item" data-tab="sidebar" onclick="switchMobileTab('sidebar')">
-      <span class="mobile-nav-icon">⚙️</span>
-      <span>整理</span>
-    </div>
-  </div>
 </div>
 
 <!-- 每日回顾弹窗 -->
@@ -1090,42 +978,25 @@
 <!-- API Key 弹窗 -->
 <div class="modal-overlay" id="api-modal">
   <div class="modal">
-    <h3 style="margin-bottom:8px">🔑 设置 AI API Key</h3>
-    <p style="margin-bottom:12px">Key 仅存在浏览器本地（localStorage），不会上传任何服务器。</p>
-    
-    <div style="margin-bottom:12px">
-      <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">选择 AI 服务商：</label>
-      <select id="api-provider-select" onchange="onProviderChange()" style="width:100%;padding:8px;border-radius:var(--r);border:1px solid var(--border);outline:none;background:var(--surface)">
-        <option value="deepseek">DeepSeek (推荐 - 便宜且强大)</option>
-        <option value="claude">Claude (Anthropic)</option>
-      </select>
+    <h3>🔑 设置 DeepSeek API Key</h3>
+    <p>Key 仅存在浏览器本地（localStorage），不会上传任何服务器。</p>
+    <input type="password" id="api-key-input" placeholder="sk-..." autocomplete="off">
+    <div style="font-size:12px;color:var(--ink-dim);margin-bottom:12px">
+      获取地址：<a href="https://platform.deepseek.com" target="_blank" style="color:var(--blue)">platform.deepseek.com</a>
     </div>
-    
-    <div style="margin-bottom:12px">
-      <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">API Key：</label>
-      <input type="password" id="api-key-input" placeholder="sk-..." autocomplete="off" style="margin-bottom:4px">
-      <div style="font-size:12px;color:var(--ink-dim)" id="api-url-hint">
-        获取地址：<a href="https://platform.deepseek.com" target="_blank" id="api-link" style="color:var(--blue)">platform.deepseek.com</a>
-      </div>
-    </div>
-    
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeApiModal()">取消</button>
       <button class="btn btn-primary" onclick="saveApiKey()">保存</button>
     </div>
-    <div class="modal-note" style="margin-top:12px">⚠️ AI加工功能（门禁四问、7刃切割、挖矿）需要 API Key 才能使用。笔记捕获和管理功能无需 Key。</div>
+    <div class="modal-note">⚠️ AI加工功能（门禁四问、7刃切割、挖矿）需要API Key才能使用。笔记捕获和管理功能无需Key。</div>
   </div>
 </div>
 
 <script>
 // ── 数据层 ──────────────────────────────────────────────────────────────
 const STORAGE_KEY = 'brain_notes_v2';
-const API_PROVIDER_KEY = 'brain_api_provider';
-const API_KEY_DEEPSEEK_KEY = 'brain_api_key_deepseek';
-const API_KEY_CLAUDE_KEY = 'claude_api_key'; // 兼容老用户的 key
+const API_KEY_KEY = 'deepseek_api_key';
 const EXPIRE_DAYS = 14;
-const GIST_TOKEN_KEY = 'brain_gist_token';
-const GIST_ID_KEY = 'brain_gist_id';
 
 let notes = [];
 let currentView = 'all';
@@ -1145,15 +1016,8 @@ function saveNotes() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
 }
 
-function getApiProvider() {
-  return localStorage.getItem(API_PROVIDER_KEY) || 'deepseek';
-}
-
-function getApiKey(provider = getApiProvider()) {
-  if (provider === 'claude') {
-    return localStorage.getItem(API_KEY_CLAUDE_KEY) || '';
-  }
-  return localStorage.getItem(API_KEY_DEEPSEEK_KEY) || '';
+function getApiKey() {
+  return localStorage.getItem(API_KEY_KEY) || '';
 }
 
 // ── 工具函数 ──────────────────────────────────────────────────────────
@@ -1382,10 +1246,6 @@ function selectNote(id) {
   renderNotes();
   showAiTools();
   updateDetailPanel();
-  
-  if (window.innerWidth <= 900) {
-    switchMobileTab('panel');
-  }
 }
 
 function showAiTools() {
@@ -1453,60 +1313,32 @@ function purgeExpired() {
   renderNotes();
 }
 
-// ── AI API 调用 (DeepSeek / Claude) ───────────────────────────────────
-async function callAI(prompt) {
-  const provider = getApiProvider();
-  const key = getApiKey(provider);
+// ── DeepSeek API 调用 ───────────────────────────────────────────────────
+async function callClaude(prompt) {
+  const key = getApiKey();
   if (!key) { showApiModal(); throw new Error('需要API Key'); }
 
-  if (provider === 'claude') {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-3-5-sonnet-latest',
-        max_tokens: 1500,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
+  const resp = await fetch('https://api.deepseek.com/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${key}`
+    },
+    body: JSON.stringify({
+      model: 'deepseek-chat',
+      max_tokens: 1500,
+      messages: [{ role: 'user', content: prompt }],
+      stream: false
+    })
+  });
 
-    if (!resp.ok) {
-      const err = await resp.json().catch(() => ({}));
-      throw new Error(err.error?.message || `API错误 ${resp.status}`);
-    }
-    const data = await resp.json();
-    return data.content[0].text;
-  } else {
-    // DeepSeek API
-    const resp = await fetch('https://api.deepseek.com/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${key}`
-      },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        max_tokens: 1500,
-        messages: [{ role: 'user', content: prompt }],
-        stream: false
-      })
-    });
-
-    if (!resp.ok) {
-      const err = await resp.json().catch(() => ({}));
-      throw new Error(err.error?.message || `API错误 ${resp.status}`);
-    }
-    const data = await resp.json();
-    return data.choices[0].message.content;
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error?.message || `API错误 ${resp.status}`);
   }
+  const data = await resp.json();
+  return data.choices[0].message.content;
 }
-
-const callClaude = callAI; // 兼容原有调用
 
 function setResult(id, text) {
   const el = document.getElementById('result-'+id);
@@ -1631,60 +1463,20 @@ ${sparkResult ? `7刃切割结果（参考）：\n"""\n${sparkResult}\n"""\n` : 
 }
 
 // ── API Key 管理 ──────────────────────────────────────────────────────
-function onProviderChange() {
-  const provider = document.getElementById('api-provider-select').value;
-  const input = document.getElementById('api-key-input');
-  const link = document.getElementById('api-link');
-  
-  if (provider === 'deepseek') {
-    input.placeholder = 'sk-...';
-    input.value = localStorage.getItem(API_KEY_DEEPSEEK_KEY) || '';
-    link.href = 'https://platform.deepseek.com';
-    link.textContent = 'platform.deepseek.com';
-  } else {
-    input.placeholder = 'sk-ant-api03-...';
-    input.value = localStorage.getItem(API_KEY_CLAUDE_KEY) || '';
-    link.href = 'https://console.anthropic.com';
-    link.textContent = 'console.anthropic.com';
-  }
-}
-
 function showApiModal() {
-  const provider = getApiProvider();
-  document.getElementById('api-provider-select').value = provider;
-  onProviderChange();
+  document.getElementById('api-key-input').value = getApiKey();
   document.getElementById('api-modal').classList.add('visible');
 }
-
-function closeApiModal() {
-  document.getElementById('api-modal').classList.remove('visible');
-}
-
+function closeApiModal() { document.getElementById('api-modal').classList.remove('visible'); }
 function saveApiKey() {
-  const provider = document.getElementById('api-provider-select').value;
   const key = document.getElementById('api-key-input').value.trim();
-  
-  localStorage.setItem(API_PROVIDER_KEY, provider);
-  if (provider === 'claude') {
-    localStorage.setItem(API_KEY_CLAUDE_KEY, key);
-  } else {
-    localStorage.setItem(API_KEY_DEEPSEEK_KEY, key);
-  }
-  
+  localStorage.setItem(API_KEY_KEY, key);
   updateApiDot();
   closeApiModal();
 }
-
 function updateApiDot() {
   const dot = document.getElementById('api-dot');
-  const provider = getApiProvider();
-  const key = getApiKey(provider);
-  dot.classList.toggle('active', !!key);
-  
-  const btnText = document.getElementById('api-btn-text');
-  if (btnText) {
-    btnText.textContent = provider === 'deepseek' ? 'DeepSeek API' : 'Claude API';
-  }
+  dot.classList.toggle('active', !!getApiKey());
 }
 
 // ── AI 洞察 ───────────────────────────────────────────────────────────
@@ -1924,20 +1716,6 @@ updateInsightCount();
 checkDailyReview();
 checkInsightReminder();
 
-// 自动配置云同步（通过URL参数一键绑定）
-(function autoSetupSync() {
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get('token');
-  const gist = params.get('gist');
-  if (token) {
-    localStorage.setItem(GIST_TOKEN_KEY, token);
-    if (gist) localStorage.setItem(GIST_ID_KEY, gist);
-    // 清除URL中的敏感参数
-    window.history.replaceState({}, '', window.location.pathname);
-  }
-})();
-updateGistUI();
-
 // ── 每日回顾 ──────────────────────────────────────────────────────────
 const REVIEW_KEY = 'brain_last_review_date';
 const INSIGHT_REMIND_KEY = 'brain_last_insight_date';
@@ -2031,186 +1809,6 @@ window.runInsight = async function(mode) {
   await _origRunInsight(mode);
   localStorage.setItem(INSIGHT_REMIND_KEY, new Date().toISOString());
 };
-
-// ── PWA Service Worker 注册 ──────────────────────────────────────────
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('Service Worker 注册成功', reg))
-      .catch(err => console.log('Service Worker 注册失败', err));
-  });
-}
-
-// ── 移动端视图切换 ─────────────────────────────────────────────────────
-let currentMobileTab = 'main';
-
-function switchMobileTab(tab) {
-  currentMobileTab = tab;
-  const layout = document.querySelector('.layout');
-  layout.classList.remove('show-sidebar', 'show-main', 'show-panel');
-  
-  if (tab === 'sidebar') layout.classList.add('show-sidebar');
-  else if (tab === 'panel') layout.classList.add('show-panel');
-  else layout.classList.add('show-main');
-  
-  document.querySelectorAll('.mobile-nav-item').forEach(el => {
-    el.classList.toggle('active', el.dataset.tab === tab);
-  });
-}
-
-// ── GitHub Gist 云同步 ────────────────────────────────────────────────
-
-function getGistToken() { return localStorage.getItem(GIST_TOKEN_KEY) || ''; }
-function getGistId() { return localStorage.getItem(GIST_ID_KEY) || ''; }
-
-function updateGistUI() {
-  const token = getGistToken();
-  const setupEl = document.getElementById('gist-sync-setup');
-  const actionsEl = document.getElementById('gist-sync-actions');
-  if (!setupEl || !actionsEl) return;
-  if (token) {
-    setupEl.style.display = 'none';
-    actionsEl.style.display = 'block';
-    const gistId = getGistId();
-    document.getElementById('gist-status-msg').textContent = gistId ? `已连接云端 (Gist: ${gistId.slice(0,8)}...)` : '已绑定 Token，首次同步将自动创建云端存储';
-  } else {
-    setupEl.style.display = 'block';
-    actionsEl.style.display = 'none';
-  }
-}
-
-function saveGistToken() {
-  const token = document.getElementById('gist-token-input').value.trim();
-  if (!token) return;
-  localStorage.setItem(GIST_TOKEN_KEY, token);
-  updateGistUI();
-}
-
-function clearGistToken() {
-  localStorage.removeItem(GIST_TOKEN_KEY);
-  localStorage.removeItem(GIST_ID_KEY);
-  updateGistUI();
-}
-
-function mergeNotes(local, remote) {
-  const map = new Map();
-  local.forEach(n => map.set(n.id, n));
-  remote.forEach(n => {
-    const loc = map.get(n.id);
-    if (!loc) {
-      map.set(n.id, n);
-    } else {
-      const localDate = new Date(loc.processedAt || loc.createdAt).getTime();
-      const remoteDate = new Date(n.processedAt || n.createdAt).getTime();
-      if (n.deleted && !loc.deleted) {
-        map.set(n.id, n);
-      } else if (!n.deleted && loc.deleted) {
-        // keep local deleted
-      } else if (remoteDate > localDate) {
-        map.set(n.id, n);
-      }
-    }
-  });
-  return Array.from(map.values()).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-}
-
-async function syncWithGist() {
-  const token = getGistToken();
-  if (!token) return;
-  
-  const btn = document.getElementById('btn-sync');
-  const origText = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = '⚡ 正在同步中...';
-  
-  let gistId = getGistId();
-  const filename = 'brain_notes_backup.json';
-  
-  try {
-    let remoteNotes = [];
-    
-    if (gistId) {
-      const resp = await fetch(`https://api.github.com/gists/${gistId}`, {
-        headers: {
-          'Authorization': `token ${token}`,
-          'Accept': 'application/vnd.github+json'
-        }
-      });
-      if (resp.status === 404) {
-        gistId = '';
-      } else if (!resp.ok) {
-        throw new Error(`获取云端失败: ${resp.statusText}`);
-      } else {
-        const data = await resp.json();
-        const file = data.files[filename];
-        if (file && file.content) {
-          remoteNotes = JSON.parse(file.content);
-        }
-      }
-    }
-    
-    loadNotes();
-    const merged = mergeNotes(notes, remoteNotes);
-    notes = merged;
-    saveNotes();
-    renderNotes();
-    
-    const body = {
-      description: '灵感库 · 第二大脑云端同步数据',
-      public: false,
-      files: {
-        [filename]: {
-          content: JSON.stringify(notes, null, 2)
-        }
-      }
-    };
-    
-    let uploadResp;
-    if (gistId) {
-      uploadResp = await fetch(`https://api.github.com/gists/${gistId}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `token ${token}`,
-          'Accept': 'application/vnd.github+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-      });
-    } else {
-      uploadResp = await fetch('https://api.github.com/gists', {
-        method: 'POST',
-        headers: {
-          'Authorization': `token ${token}`,
-          'Accept': 'application/vnd.github+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-      });
-    }
-    
-    if (!uploadResp.ok) {
-      throw new Error(`上传云端失败: ${uploadResp.statusText}`);
-    }
-    
-    const resultData = await uploadResp.json();
-    if (!gistId) {
-      gistId = resultData.id;
-      localStorage.setItem(GIST_ID_KEY, gistId);
-    }
-    
-    updateGistUI();
-    btn.textContent = '✅ 同步成功！';
-    setTimeout(() => {
-      btn.disabled = false;
-      btn.textContent = origText;
-    }, 2000);
-    
-  } catch (err) {
-    alert('同步发生错误: ' + err.message);
-    btn.disabled = false;
-    btn.textContent = origText;
-  }
-}
 </script>
 </body>
 </html>
